@@ -18,6 +18,11 @@ public class PlayerController : MonoBehaviour
         _motor = GetComponent<FPSMotor>();
     }
 
+    private void Start()
+    {
+        Cursor.lockState = CursorLockMode.Locked;
+    }
+
     private void OnEnable()
     {
         //subscribes methods to input detection from InputManager

@@ -1,14 +1,19 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 [RequireComponent(typeof(InputManager))]
 [RequireComponent(typeof(PlayerController))]
 
 public class FPSMotor : MonoBehaviour
 {
+    public event Action Land = delegate { };
+
     [SerializeField] Camera _camera = null;
     [SerializeField] float _cameraAngleLimit = 70f;
+    [SerializeField] GroundDetector _groundDetector = null;
+
     //tracking camera angle to avoid weird conversions
     private float _currentCameraRotationX = 0;
 
@@ -18,10 +23,24 @@ public class FPSMotor : MonoBehaviour
     Vector3 _movementThisFrame = Vector3.zero;
     float _turnAmountThisFrame = 0;
     float _lookAmountThisFrame = 0;
+    bool _isGrounded = false;
 
-    private void Awake()
+    private void Awake() 
     {
         _rigidbody = GetComponent<Rigidbody>();
+        _groundDetector = GetComponentInChildren<GroundDetector>();
+    }
+
+    private void OnEnable()
+    {
+        _groundDetector.GroundDetected += OnGroundDetected;
+        _groundDetector.GroundVanished += OnGroundVanished;
+    }
+
+    private void OnDisable()
+    {
+        _groundDetector.GroundDetected -= OnGroundDetected;
+        _groundDetector.GroundVanished -= OnGroundVanished;
     }
 
     private void FixedUpdate()
@@ -50,6 +69,9 @@ public class FPSMotor : MonoBehaviour
 
     public void Jump(float jumpForce)
     {
+        if (_isGrounded == false)
+            return;
+
         _rigidbody.AddForce(Vector3.up * jumpForce);
     }
 
@@ -87,5 +109,16 @@ public class FPSMotor : MonoBehaviour
         _camera.transform.localEulerAngles = new Vector3(_currentCameraRotationX, 0, 0);
         //clear out x movement until new request
         _lookAmountThisFrame = 0;
+    }
+
+    void OnGroundDetected()
+    {
+        _isGrounded = true;
+        Land?.Invoke();
+    }
+
+    void OnGroundVanished()
+    {
+        _isGrounded = false;
     }
 }

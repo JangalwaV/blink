@@ -10,6 +10,7 @@ public class InputManager : MonoBehaviour
     public event Action<Vector3> MoveInput = delegate { };      //Uses a Vector3 to find which direction to move
     public event Action<Vector3> RotateInput = delegate { };    //uses a Vector3 to find which direction to rotate
     public event Action JumpInput = delegate { };
+    public event Action BlinkInput = delegate { };
 
 
     void Update()
@@ -17,6 +18,7 @@ public class InputManager : MonoBehaviour
         DetectMoveInput();
         DetectRotateInput();
         DetectJumpInput();
+        DetectBlinkInput();
     }
 
     void DetectJumpInput()
@@ -25,6 +27,14 @@ public class InputManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Space))
         {
             JumpInput?.Invoke();
+        }
+    }
+
+    void DetectBlinkInput()
+    {
+        if (Input.GetMouseButtonDown(1))
+        {
+            BlinkInput?.Invoke();
         }
     }
 
