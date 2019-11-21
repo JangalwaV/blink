@@ -55,7 +55,6 @@ public class PlayerController : MonoBehaviour
     void OnJump()
     {
         //run Jump in Motor, parameters in PlayerController
-        Debug.Log("Controller Jump");
         _motor.Jump(_jumpStrength);
     }
 }
