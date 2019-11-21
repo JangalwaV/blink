@@ -73,6 +73,7 @@ public class FPSMotor : MonoBehaviour
             return;
 
         _rigidbody.AddForce(Vector3.up * jumpForce);
+        Debug.Log("Motor Jump. Grounded: " + _isGrounded);
     }
 
     void ApplyMovement(Vector3 moveVector)
