@@ -19,6 +19,8 @@ public class Blink : MonoBehaviour
     [SerializeField] AudioClip[] _blinkAudio = new AudioClip[4];
     [SerializeField] GameObject _blinkTarget = null;
     [SerializeField] float _blinkFOV = 80f;
+    [SerializeField] float _cameraShakeDuration = .15f;
+    [SerializeField] float _cameraShakeMagnitude = .2f;
 
     RaycastHit _blinkHit;
     GameObject _targetObject = null;
@@ -91,8 +93,6 @@ public class Blink : MonoBehaviour
         _fovTimer = _fovTimerDuration;
         StartCoroutine(FOVFeedback());
         Debug.Log("Started FOV Coroutine");
-        //TODO Blur
-        //TODO Camera Shake
     }
 
     IEnumerator BlinkMovement()
@@ -110,6 +110,7 @@ public class Blink : MonoBehaviour
 
     IEnumerator DisplayTarget()
     {
+        //Updates targeting prefab to raycast
         if (_targetObject != null)
         {
             _targetObject.transform.position = _targetLocation;
@@ -117,23 +118,51 @@ public class Blink : MonoBehaviour
         }
         else if (_targetObject == null)
         {
+            //Instantiates game object if one doesn't exist yet
             _targetObject = Instantiate(_blinkTarget, _targetLocation, Quaternion.identity);
         }
     }
 
     IEnumerator FOVFeedback()
     {
-        Debug.Log("Entered Coroutine");
+        //Increase FOV
         while(_camera.fieldOfView < _blinkFOV) { 
             _camera.fieldOfView += 5;
-            Debug.Log("Increasing FOV...");
             yield return new WaitForFixedUpdate();
         }
-        while(_camera.fieldOfView > _baseCameraFOV)
+
+        //camera shake during landing
+        StartCoroutine(CameraShake(_cameraShakeDuration, _cameraShakeMagnitude));
+        
+        //Decrease FOV
+        while (_camera.fieldOfView > _baseCameraFOV)
         {
             _camera.fieldOfView -= 2;
             yield return new WaitForFixedUpdate();
         }
+
+        //reset FOV exactly
         _camera.fieldOfView = _baseCameraFOV;
+    }
+
+    public IEnumerator CameraShake(float duration, float magnitude)
+    {
+        Vector3 originalPosition = _camera.transform.localPosition;
+
+        float elapsed = 0.0f;
+
+        while (elapsed < duration)
+        {
+            float x = Random.Range(-1f, 1f) * magnitude;
+            float z = Random.Range(-1f, 1f) * magnitude;
+
+            _camera.transform.localPosition = new Vector3(x, originalPosition.y, z);
+
+            elapsed += Time.deltaTime;
+
+            yield return null;
+        }
+
+        _camera.transform.localPosition = originalPosition;
     }
 }
